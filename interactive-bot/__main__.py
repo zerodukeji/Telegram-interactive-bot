@@ -1,10 +1,8 @@
 import os
 import random
 import time
-from datetime import datetime, timedelta
 from string import ascii_letters as letters
 
-import httpx
 import telegram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.error import BadRequest
@@ -92,12 +90,12 @@ async def _send_media_group_later(context: ContextTypes.DEFAULT_TYPE):
 
 # 延时发送媒体组消息
 async def send_media_group_later(
-    delay: float,
-    chat_id,
-    target_id,
-    media_group_id: int,
-    dir,
-    context: ContextTypes.DEFAULT_TYPE,
+        delay: float,
+        chat_id,
+        target_id,
+        media_group_id: int,
+        dir,
+        context: ContextTypes.DEFAULT_TYPE,
 ):
     name = f"sendmediagroup_{chat_id}_{target_id}_{dir}"
     context.job_queue.run_once(
@@ -120,13 +118,13 @@ def update_user_db(user: telegram.User):
 
 
 async def send_contact_card(
-    chat_id, message_thread_id, user: User, update: Update, context: ContextTypes
+        chat_id, message_thread_id, user: User, update: Update, context: ContextTypes
 ):
     buttons = []
     buttons.append(
         [
             InlineKeyboardButton(
-                f"{'🏆 高级会员' if user.is_premium else '✈️ 普通会员' }",
+                f"{'🏆 高级会员' if user.is_premium else '✈️ 普通会员'}",
                 url=f"https://github.com/MiHaKun/Telegram-interactive-bot",
             )
         ]
@@ -205,7 +203,7 @@ async def check_human(update: Update, context: ContextTypes.DEFAULT_TYPE):
         buttons = [
             InlineKeyboardButton(x, callback_data=f"vcode_{x}_{user.id}") for x in codes
         ]
-        button_matrix = [buttons[i : i + 4] for i in range(0, len(buttons), 4)]
+        button_matrix = [buttons[i: i + 4] for i in range(0, len(buttons), 4)]
         sent = await update.message.reply_photo(
             photo,
             f"{mention_html(user.id, user.first_name)}请选择图片中的文字。回答错误将无法联系客服。",
@@ -260,9 +258,9 @@ async def forwarding_message_u2a(update: Update, context: ContextTypes.DEFAULT_T
     u = db.query(User).filter(User.user_id == user.id).first()
     message_thread_id = u.message_thread_id
     if (
-        f := db.query(FormnStatus)
-        .filter(FormnStatus.message_thread_id == message_thread_id)
-        .first()
+            f := db.query(FormnStatus)
+                    .filter(FormnStatus.message_thread_id == message_thread_id)
+                    .first()
     ):
         if f.status == "closed":
             await update.message.reply_html(
@@ -292,9 +290,9 @@ async def forwarding_message_u2a(update: Update, context: ContextTypes.DEFAULT_T
         # 用户引用了一条消息。我们需要找到这条消息在群组中的id
         reply_in_user_chat = update.message.reply_to_message.message_id
         if (
-            msg_map := db.query(MessageMap)
-            .filter(MessageMap.user_chat_message_id == reply_in_user_chat)
-            .first()
+                msg_map := db.query(MessageMap)
+                        .filter(MessageMap.user_chat_message_id == reply_in_user_chat)
+                        .first()
         ):
             params["reply_to_message_id"] = msg_map.group_chat_message_id
     try:
@@ -309,7 +307,7 @@ async def forwarding_message_u2a(update: Update, context: ContextTypes.DEFAULT_T
             db.add(msg)
             db.commit()
             if update.message.media_group_id != context.user_data.get(
-                "current_media_group_id", 0
+                    "current_media_group_id", 0
             ):
                 context.user_data["current_media_group_id"] = (
                     update.message.media_group_id
@@ -374,9 +372,9 @@ async def forwarding_message_a2u(update: Update, context: ContextTypes.DEFAULT_T
             user_id, "对话已经结束。对方已经关闭了对话。你的留言将被忽略。"
         )
         if (
-            f := db.query(FormnStatus)
-            .filter(FormnStatus.message_thread_id == update.message.message_thread_id)
-            .first()
+                f := db.query(FormnStatus)
+                        .filter(FormnStatus.message_thread_id == update.message.message_thread_id)
+                        .first()
         ):
             f.status = "closed"
             db.add(f)
@@ -385,18 +383,18 @@ async def forwarding_message_a2u(update: Update, context: ContextTypes.DEFAULT_T
     if update.message.forum_topic_reopened:
         await context.bot.send_message(user_id, "对方重新打开了对话。可以继续对话了。")
         if (
-            f := db.query(FormnStatus)
-            .filter(FormnStatus.message_thread_id == update.message.message_thread_id)
-            .first()
+                f := db.query(FormnStatus)
+                        .filter(FormnStatus.message_thread_id == update.message.message_thread_id)
+                        .first()
         ):
             f.status = "opened"
             db.add(f)
             db.commit()
         return
     if (
-        f := db.query(FormnStatus)
-        .filter(FormnStatus.message_thread_id == message_thread_id)
-        .first()
+            f := db.query(FormnStatus)
+                    .filter(FormnStatus.message_thread_id == message_thread_id)
+                    .first()
     ):
         if f.status == "closed":
             await update.message.reply_html(
@@ -410,9 +408,9 @@ async def forwarding_message_a2u(update: Update, context: ContextTypes.DEFAULT_T
         # 群组中，客服回复了一条消息。我们需要找到这条消息在用户中的id
         reply_in_admin = update.message.reply_to_message.message_id
         if (
-            msg_map := db.query(MessageMap)
-            .filter(MessageMap.group_chat_message_id == reply_in_admin)
-            .first()
+                msg_map := db.query(MessageMap)
+                        .filter(MessageMap.group_chat_message_id == reply_in_admin)
+                        .first()
         ):
             params["reply_to_message_id"] = msg_map.user_chat_message_id
     try:
@@ -471,9 +469,9 @@ async def clear(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_delete_user_messages:
         return
     if (
-        target_user := db.query(User)
-        .filter(User.message_thread_id == update.message.message_thread_id)
-        .first()
+            target_user := db.query(User)
+                    .filter(User.message_thread_id == update.message.message_thread_id)
+                    .first()
     ):
         all_messages_in_user_chat = (
             db.query(MessageMap).filter(MessageMap.user_id == target_user.user_id).all()

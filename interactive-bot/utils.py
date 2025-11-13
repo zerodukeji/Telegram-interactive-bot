@@ -1,10 +1,6 @@
 import datetime
-import io
-import random
-from string import ascii_letters as letters
 
 import pytz
-from telegram import ChatMember, ChatMemberUpdated
 from telegram.ext import ContextTypes
 
 
@@ -17,10 +13,11 @@ async def _delete_message_cb(context: ContextTypes.DEFAULT_TYPE):
         pass
 
 
-async def delete_message_later(delay: float, chat_id, msg_id: int,  context: ContextTypes.DEFAULT_TYPE):
-    name=f"deljob_{chat_id}_{msg_id}"
+async def delete_message_later(delay: float, chat_id, msg_id: int, context: ContextTypes.DEFAULT_TYPE):
+    name = f"deljob_{chat_id}_{msg_id}"
     context.job_queue.run_once(_delete_message_cb, delay, chat_id=chat_id, name=name, data=msg_id)
     return name
+
 
 async def _ban_user_cb(context: ContextTypes.DEFAULT_TYPE):
     job = context.job
@@ -33,9 +30,10 @@ async def _ban_user_cb(context: ContextTypes.DEFAULT_TYPE):
 
 
 async def ban_user_later(delay: float, chat_id, user_id: int, time, context: ContextTypes.DEFAULT_TYPE):
-    name=f"banjob_{chat_id}_{user_id}"
-    context.job_queue.run_once(_ban_user_cb, delay, chat_id=chat_id, name=name , data=f"{user_id}-{time}")
+    name = f"banjob_{chat_id}_{user_id}"
+    context.job_queue.run_once(_ban_user_cb, delay, chat_id=chat_id, name=name, data=f"{user_id}-{time}")
     return name
+
 
 def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
     """Remove job with given name. Returns whether job was removed."""
@@ -45,4 +43,3 @@ def remove_job_if_exists(name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
     for job in current_jobs:
         job.schedule_removal()
     return True
-
