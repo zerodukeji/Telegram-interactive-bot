@@ -20,6 +20,7 @@ from telegram.helpers import mention_html
 
 from db.database import SessionMaker, engine
 from db.model import Base, FormnStatus, MediaGroupMesssage, MessageMap, User
+from . import proxy_url, proxy_username, proxy_password  # 导入新增的代理变量
 
 from . import (
     admin_group_id,
@@ -530,10 +531,24 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 if __name__ == "__main__":
+    # 构建带认证的代理 URL（如果有用户名密码）
+    if proxy_url and proxy_username and proxy_password:
+        # 拆分代理协议和地址（如从 "socks5://127.0.0.1:1080" 中提取 "socks5://" 和 "127.0.0.1:1080"）
+        from urllib.parse import urlparse
+
+        parsed = urlparse(proxy_url)
+        proxy_auth_url = f"{parsed.scheme}://{proxy_username}:{proxy_password}@{parsed.netloc}{parsed.path}"
+    else:
+        proxy_auth_url = proxy_url
     pickle_persistence = PicklePersistence(filepath=f"./assets/{app_name}.pickle")
+    # 创建 Application 时直接设置代理（核心修正）
+    application_builder = ApplicationBuilder().token(bot_token)
+    # 仅当代理 URL 存在时才配置代理
+    if proxy_auth_url:
+        application_builder = application_builder.proxy(proxy_auth_url)
+
     application = (
-        ApplicationBuilder()
-        .token(bot_token)
+        application_builder
         .persistence(persistence=pickle_persistence)
         .build()
     )

@@ -29,3 +29,8 @@ is_delete_topic_as_ban_forever = os.getenv("DELETE_TOPIC_AS_FOREVER_BAN") == "TR
 is_delete_user_messages = os.getenv("DELETE_USER_MESSAGE_ON_CLEAR_CMD") == "TRUE"
 disable_captcha = os.getenv("DISABLE_CAPTCHA") == "TRUE"
 message_interval = int(os.getenv("MESSAGE_INTERVAL", 5))
+
+# 原代码已加载 dotenv，直接新增以下内容
+proxy_url = os.getenv("PROXY_URL")  # 代理地址，如 "http://127.0.0.1:1080" 或 "socks5://127.0.0.1:1080"
+proxy_username = os.getenv("PROXY_USERNAME")  # 可选，代理用户名
+proxy_password = os.getenv("PROXY_PASSWORD")  # 可选，代理密码
