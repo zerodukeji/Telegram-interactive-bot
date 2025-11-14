@@ -1,4 +1,3 @@
-import pkg_resources
 import os
 import logging
 from dotenv import load_dotenv
